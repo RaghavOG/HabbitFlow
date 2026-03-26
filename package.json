@@ -2,11 +2,22 @@
   "name": "habbitflow",
   "version": "0.1.0",
   "private": true,
+  "author": "Raghav Singla",
+  "homepage": "https://habbitflow-sigma.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RaghavOG/HabbitFlow"
+  },
+  "bugs": {
+    "url": "https://github.com/RaghavOG/HabbitFlow/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "ci": "npm run lint && npm run typecheck && npm run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

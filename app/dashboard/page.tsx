@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
@@ -28,6 +29,7 @@ function monthLabel(year: number, month1to12: number) {
 const EMPTY_HABITS: DashboardHabit[] = []
 
 export default function DashboardPage() {
+  const router = useRouter()
   const [monthCursor, setMonthCursor] = React.useState(() => new Date())
   const year = monthCursor.getUTCFullYear()
   const month = monthCursor.getUTCMonth() + 1 // 1-12
@@ -71,6 +73,11 @@ export default function DashboardPage() {
   React.useEffect(() => {
     void fetchDashboard({ showSpinner: !hasMonthData })
   }, [fetchDashboard, hasMonthData])
+
+  React.useEffect(() => {
+    if (!authRequired) return
+    router.replace("/signin")
+  }, [authRequired, router])
 
   const toggleHabit = React.useCallback(
     async (habitId: string, dateKey: string) => {

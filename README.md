@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# HabitFlow
 
-## Getting Started
+## Logo
+<img src="./public/logo.svg" alt="HabitFlow logo" width="64" />
 
-First, run the development server:
+HabitFlow is a cross-platform habit tracker and analytics dashboard built with Next.js, MongoDB, and a time-series log model.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Screenshots
+| Dashboard | AI Insights |
+|---|---|
+| ![Dashboard](./public/screenshots/dashboard.svg) | ![AI Insights](./public/screenshots/ai-insights.svg) |
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
+- Habit tracking matrix (rows = habits, columns = days)
+- Streak calculation from completed day history
+- Success rate + progress analytics per habit (monthly)
+- Monthly performance chart
+- Auth with httpOnly JWT cookie (no repeated login)
+- Dark/Light mode
+- Habit edit + delete actions
+- AI Weekly Insights card (rule-based fallback if OpenAI key is not set)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
+- Next.js (App Router)
+- MongoDB + Mongoose
+- Tailwind CSS + shadcn/ui
+- Redux Toolkit + redux-persist (dashboard state persistence)
+- Recharts / Chart.js (analytics)
+- OpenAI (optional, for AI Insights)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Architecture
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
-## Learn More
+## Installation
+1. Install dependencies:
+   ```bash
+   npm ci
+   ```
+2. Configure environment variables:
+   - Copy `.env.example` to `.env` and fill in values
+3. Start the dev server:
+   ```bash
+   npm run dev
+   ```
+4. Open the app at `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+## Env Variables
+Required:
+- `MONGODB_URI` - MongoDB connection string
+- `JWT_SECRET` - secret used for signing/verifying the auth cookie token
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Optional:
+- `OPENAI_API_KEY` - enables real AI insights; when missing, the UI uses deterministic fallback insights
+- `OPENAI_MODEL` - OpenAI model name (defaults to `gpt-4o-mini`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Full list in [`./.env.example`](./.env.example).
 
-## Deploy on Vercel
+## API
+Documentation: [`docs/api.md`](./docs/api.md).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Roadmap
+- Reminders
+- Offline sync
+- Export data
+- PWA service worker wiring
+- Improved desktop (Electron) packaging/UX
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+MIT (see [`LICENSE`](./LICENSE)).

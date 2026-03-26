@@ -1,0 +1,25 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#60A5FA" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#10B981" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="120" y="110" width="1040" height="500" rx="28" fill="#0F172A" opacity="0.55" stroke="#334155" stroke-width="2"/>
+  <rect x="170" y="170" width="940" height="70" rx="18" fill="#111827" opacity="0.75"/>
+  <circle cx="240" cy="205" r="22" fill="url(#accent)" opacity="0.95"/>
+  <text x="285" y="212" fill="#E2E8F0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI" font-size="28" font-weight="700">AI Insights (placeholder)</text>
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI" font-size="22" fill="#CBD5E1" opacity="0.9">
+    <text x="190" y="280">" Youre on a streak  keep it going.</text>
+    <text x="190" y="320">" Weekend consistency: plan a simple routine.</text>
+    <text x="190" y="360">" Suggestion: adjust a habit goal for easier wins.</text>
+  </g>
+  <rect x="170" y="430" width="940" height="130" rx="22" fill="#0B1220" opacity="0.6" stroke="#243042" stroke-width="2"/>
+  <text x="220" y="495" fill="#93C5FD" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI" font-size="20" font-weight="600">Weekly AI report (stored in Mongo for caching)</text>
+</svg>
+
