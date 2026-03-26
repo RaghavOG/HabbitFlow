@@ -1,0 +1,18 @@
+Project: HabitFlow
+
+Stack:
+- Next.js App Router
+- MongoDB + Mongoose
+- Tailwind + shadcn/ui
+- Chart.js
+
+Rules:
+- Use functional React components
+- Use Tailwind for styling
+- Use shadcn components
+- Use API routes for backend
+- Use Mongoose models for DB
+- Habit logs must be stored per date
+- Do not store streak directly; calculate it
+- Write clean, modular code
+- Use async/await
