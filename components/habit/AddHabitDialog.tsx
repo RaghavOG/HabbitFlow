@@ -33,7 +33,7 @@ export default function AddHabitDialog({
   const [open, setOpen] = React.useState(false)
   const [name, setName] = React.useState("")
   const [color, setColor] = React.useState("#22c55e")
-  const [goalPerMonth, setGoalPerMonth] = React.useState<number>(20)
+  const [goalPerMonth, setGoalPerMonth] = React.useState<number>(31)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -45,7 +45,7 @@ export default function AddHabitDialog({
   }, [month, year])
 
   React.useEffect(() => {
-    setGoalPerMonth((g) => clampInt(g, 1, maxDays))
+    setGoalPerMonth((g) => (g === 31 ? maxDays : clampInt(g, 1, maxDays)))
   }, [maxDays])
 
   return (
@@ -143,7 +143,7 @@ export default function AddHabitDialog({
                 if (!res.ok) throw new Error(json.error || "Failed to create habit")
                 setName("")
                 setColor("#22c55e")
-                setGoalPerMonth(clampInt(20, 1, maxDays))
+                setGoalPerMonth(maxDays)
                 setOpen(false)
                 onCreated?.()
               } catch (e: unknown) {

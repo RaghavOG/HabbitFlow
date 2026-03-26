@@ -18,9 +18,11 @@ import {
 } from "@/lib/redux/dashboardSlice"
 import type { DashboardHabit } from "@/lib/redux/dashboardSlice"
 import { formatDateKeyUTC, toStartOfDayUTC } from "@/utils/date"
-import { CalendarCheck2, Flame, RotateCcw, BarChart2 } from "lucide-react"
+import { CalendarCheck2, Flame, RotateCcw, BarChart2, ChevronDown } from "lucide-react"
 import AIInsightsCard from "@/components/ai/AIInsightsCard"
 import { toast } from "sonner"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 function monthLabel(year: number, month1to12: number) {
   const d = new Date(Date.UTC(year, month1to12 - 1, 1))
@@ -62,6 +64,16 @@ export default function DashboardPage() {
   const hasMonthData = persistedHabits !== undefined
   const habits: DashboardHabit[] = persistedHabits ?? EMPTY_HABITS
   const displayHabits = React.useMemo(() => [...habits].reverse(), [habits])
+  const [habitsPanelOpen, setHabitsPanelOpen] = React.useState(true)
+
+  React.useEffect(() => {
+    // Default: collapsed on small screens, open on >= sm.
+    const mq = window.matchMedia("(min-width: 640px)")
+    const apply = () => setHabitsPanelOpen(mq.matches)
+    apply()
+    mq.addEventListener("change", apply)
+    return () => mq.removeEventListener("change", apply)
+  }, [])
 
   const [authRequired, setAuthRequired] = React.useState(false)
   const [loadingInitial, setLoadingInitial] = React.useState(false)
@@ -176,7 +188,12 @@ export default function DashboardPage() {
   const seedMorningRoutine = React.useCallback(async () => {
     setSeedingRoutine(true)
     try {
-      const res = await fetch("/api/habits/seed-morning-routine", { method: "POST", credentials: "include" })
+      const res = await fetch("/api/habits/seed-morning-routine", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year, month }),
+      })
       const json = (await res.json()) as { error?: string; created?: number; skipped?: number }
       if (!res.ok) throw new Error(json.error || "Failed to add routine habits")
       toast.success(`Added ${json.created ?? 0} habits${(json.skipped ?? 0) > 0 ? ` (skipped ${json.skipped})` : ""}`)
@@ -186,7 +203,7 @@ export default function DashboardPage() {
     } finally {
       setSeedingRoutine(false)
     }
-  }, [fetchDashboard])
+  }, [fetchDashboard, month, year])
 
   const motivation = React.useMemo(() => {
     if (!habits.length) return { streakText: "Start a habit today", weekdayText: "", goalText: "" }
@@ -345,21 +362,51 @@ export default function DashboardPage() {
                 </Button>
               </div>
 
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-300">
-                {displayHabits.map((h) => (
-                  <div key={h._id} className="flex items-center gap-2">
-                    <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: h.color }} />
-                    <span className="whitespace-nowrap">{h.name}</span>
-                    <HabitActionsMenu
-                      habit={{ _id: h._id, name: h.name, color: h.color, goalPerMonth: h.goalPerMonth }}
-                      year={year}
-                      month={month}
-                      onSaved={() => void fetchDashboard({ showSpinner: false })}
-                      onDeleted={() => void fetchDashboard({ showSpinner: false })}
-                    />
+              <Collapsible open={habitsPanelOpen} onOpenChange={setHabitsPanelOpen}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm text-zinc-300">
+                    Habits <span className="text-zinc-500">({displayHabits.length})</span>
                   </div>
-                ))}
-              </div>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-xl"
+                      aria-label={habitsPanelOpen ? "Collapse habits list" : "Expand habits list"}
+                    >
+                      <ChevronDown className={`size-4 transition-transform ${habitsPanelOpen ? "rotate-180" : ""}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+
+                <CollapsibleContent>
+                  <ScrollArea className="mt-3 h-[220px] sm:h-auto">
+                    <div className="grid grid-cols-1 gap-2 text-sm text-zinc-300 sm:grid-cols-2 lg:grid-cols-3">
+                      {displayHabits.map((h) => (
+                        <div
+                          key={h._id}
+                          className="flex items-center justify-between gap-2 rounded-xl border border-zinc-800/80 bg-zinc-900/30 px-2.5 py-1.5"
+                        >
+                          <div className="min-w-0 flex items-center gap-2">
+                            <span
+                              className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                              style={{ backgroundColor: h.color }}
+                            />
+                            <span className="truncate whitespace-nowrap">{h.name}</span>
+                          </div>
+                          <HabitActionsMenu
+                            habit={{ _id: h._id, name: h.name, color: h.color, goalPerMonth: h.goalPerMonth }}
+                            year={year}
+                            month={month}
+                            onSaved={() => void fetchDashboard({ showSpinner: false })}
+                            onDeleted={() => void fetchDashboard({ showSpinner: false })}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             <HabitGrid habits={displayHabits} year={year} month={month} onToggleHabit={toggleHabit} onMarkDone={markDone} />

@@ -40,6 +40,7 @@ type Props = {
 export default function HabitGrid({ habits, year, month, onToggleHabit, onMarkDone }: Props) {
   const todayStartUTC = toStartOfDayUTC(new Date())
   const todayKey = formatDateKeyUTC(todayStartUTC)
+  const scrollWrapRef = React.useRef<HTMLDivElement | null>(null)
 
   const days = React.useMemo(() => {
     const count = getDaysInMonth(year, month)
@@ -83,10 +84,18 @@ export default function HabitGrid({ habits, year, month, onToggleHabit, onMarkDo
     [onMarkDone]
   )
 
+  React.useEffect(() => {
+    const wrap = scrollWrapRef.current
+    if (!wrap) return
+    const target = wrap.querySelector<HTMLElement>(`[data-date-key="${todayKey}"]`)
+    if (!target) return
+    target.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" })
+  }, [todayKey, month, year, habits.length])
+
   return (
     <TooltipProvider delayDuration={150}>
       <div onPointerUp={stopDrag} onPointerCancel={stopDrag}>
-      <div className="w-full overflow-x-auto">
+      <div ref={scrollWrapRef} className="w-full overflow-x-auto">
         <Table>
         <TableHeader>
           <TableRow>
@@ -94,6 +103,10 @@ export default function HabitGrid({ habits, year, month, onToggleHabit, onMarkDo
             {days.map((day) => (
               <TableHead
                 key={day}
+                data-date-key={(() => {
+                  const dateUtc = new Date(Date.UTC(year, month - 1, day))
+                  return formatDateKeyUTC(dateUtc)
+                })()}
                 className={`px-1 text-center ${(() => {
                   const dateUtc = new Date(Date.UTC(year, month - 1, day))
                   const key = formatDateKeyUTC(dateUtc)
