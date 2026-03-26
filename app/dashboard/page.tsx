@@ -30,7 +30,7 @@ function monthLabel(year: number, month1to12: number) {
 }
 
 const EMPTY_HABITS: DashboardHabit[] = []
-const SHOW_MORNING_ROUTINE_BUTTON = true
+const SHOW_MORNING_ROUTINE_BUTTON = false
 
 export default function DashboardPage() {
   const [showMotivation, setShowMotivation] = React.useState<boolean>(() => {
