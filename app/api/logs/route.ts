@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server"
 import mongoose from "mongoose"
 import { connectToMongo } from "@/lib/mongodb"
-import { getUserIdFromRequestCookie } from "@/lib/auth"
+import { requireMongoUserIdFromClerk } from "@/lib/auth"
 import { HabitModel } from "@/models/Habit"
 import { HabitLogModel } from "@/models/HabitLog"
 
 export async function GET(req: Request) {
   await connectToMongo()
 
-  const userId = await getUserIdFromRequestCookie()
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  let userId: string
+  try {
+    userId = await requireMongoUserIdFromClerk()
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   const url = new URL(req.url)
   const habitId = url.searchParams.get("habitId") ?? ""

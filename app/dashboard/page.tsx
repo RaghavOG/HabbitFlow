@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
@@ -29,7 +29,26 @@ function monthLabel(year: number, month1to12: number) {
 const EMPTY_HABITS: DashboardHabit[] = []
 
 export default function DashboardPage() {
-  const router = useRouter()
+  const [showMotivation, setShowMotivation] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return true
+    const v = window.localStorage.getItem("hf_show_motivation")
+    return v === null ? true : v === "true"
+  })
+
+  const [showAIInsights, setShowAIInsights] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return true
+    const v = window.localStorage.getItem("hf_show_ai_insights")
+    return v === null ? true : v === "true"
+  })
+
+  React.useEffect(() => {
+    window.localStorage.setItem("hf_show_motivation", String(showMotivation))
+  }, [showMotivation])
+
+  React.useEffect(() => {
+    window.localStorage.setItem("hf_show_ai_insights", String(showAIInsights))
+  }, [showAIInsights])
+
   const [monthCursor, setMonthCursor] = React.useState(() => new Date())
   const year = monthCursor.getUTCFullYear()
   const month = monthCursor.getUTCMonth() + 1 // 1-12
@@ -74,10 +93,7 @@ export default function DashboardPage() {
     void fetchDashboard({ showSpinner: !hasMonthData })
   }, [fetchDashboard, hasMonthData])
 
-  React.useEffect(() => {
-    if (!authRequired) return
-    router.replace("/signin")
-  }, [authRequired, router])
+  // Clerk middleware handles redirects; keep authRequired only for rendering state.
 
   const toggleHabit = React.useCallback(
     async (habitId: string, dateKey: string) => {
@@ -225,10 +241,10 @@ export default function DashboardPage() {
             <div>Go to the sign in page to continue.</div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" asChild>
-                <a href="/signin">Sign in</a>
+                <Link href="/signin">Sign in</Link>
               </Button>
               <Button size="sm" asChild>
-                <a href="/signup">Sign up</a>
+                <Link href="/signup">Sign up</Link>
               </Button>
             </div>
           </CardContent>
@@ -278,6 +294,25 @@ export default function DashboardPage() {
                   <BarChart2 className="size-4 mr-2" />
                   View Analytics
                 </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-xl bg-zinc-900/40 border-zinc-800 hover:bg-zinc-900/60"
+                  onClick={() => setShowMotivation((v) => !v)}
+                >
+                  <Flame className="size-4 mr-2 text-emerald-400" />
+                  Motivation: {showMotivation ? "On" : "Off"}
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-xl bg-zinc-900/40 border-zinc-800 hover:bg-zinc-900/60"
+                  onClick={() => setShowAIInsights((v) => !v)}
+                >
+                  AI Insights: {showAIInsights ? "On" : "Off"}
+                </Button>
               </div>
 
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-300">
@@ -303,21 +338,23 @@ export default function DashboardPage() {
               <MonthlyGraph habits={habits} year={year} month={month} />
             </div>
 
-            <Card className="border-zinc-800 bg-zinc-900/30 shadow-sm rounded-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm font-medium text-zinc-200">
-                  <Flame className="size-4 text-emerald-400" />
-                  Motivation / Tips
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="text-zinc-200">{motivation.streakText}</div>
-                {motivation.weekdayText ? <div className="text-zinc-400">{motivation.weekdayText}</div> : null}
-                {motivation.goalText ? <div className="text-zinc-400">{motivation.goalText}</div> : null}
-              </CardContent>
-            </Card>
+            {showMotivation ? (
+              <Card className="border-zinc-800 bg-zinc-900/30 shadow-sm rounded-2xl">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium text-zinc-200">
+                    <Flame className="size-4 text-emerald-400" />
+                    Motivation / Tips
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <div className="text-zinc-200">{motivation.streakText}</div>
+                  {motivation.weekdayText ? <div className="text-zinc-400">{motivation.weekdayText}</div> : null}
+                  {motivation.goalText ? <div className="text-zinc-400">{motivation.goalText}</div> : null}
+                </CardContent>
+              </Card>
+            ) : null}
 
-            <AIInsightsCard />
+            <AIInsightsCard enabled={showAIInsights} />
           </div>
         </div>
       )}

@@ -9,13 +9,14 @@ type WeeklyAIResponse = {
   bullets: string[]
 }
 
-export default function AIInsightsCard() {
+export default function AIInsightsCard({ enabled }: { enabled: boolean }) {
   const [bullets, setBullets] = React.useState<string[] | null>(null)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const requestedRef = React.useRef(false)
 
   React.useEffect(() => {
+    if (!enabled) return
     if (requestedRef.current) return
     requestedRef.current = true
 
@@ -28,7 +29,9 @@ export default function AIInsightsCard() {
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Failed to load AI insights"))
       .finally(() => setLoading(false))
-  }, [])
+  }, [enabled])
+
+  if (!enabled) return null
 
   return (
     <Card className="border-zinc-800 bg-zinc-900/30 shadow-sm rounded-2xl">

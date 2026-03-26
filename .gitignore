@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# electron-builder / desktop artifacts
+electron/dist/
+electron/out/
+electron/build/
+electron/.cache/
+electron-builder.yml
+electron/node_modules
+*.exe
+*.msi
+*.dmg
+*.AppImage
+*.deb
+*.rpm

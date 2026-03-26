@@ -4,7 +4,7 @@ import { HabitModel } from "@/models/Habit"
 import { HabitLogModel } from "@/models/HabitLog"
 import { formatDateKeyUTC, getMonthRangeUTC } from "@/utils/date"
 import type { Model, Types } from "mongoose"
-import { getUserIdFromRequestCookie } from "@/lib/auth"
+import { requireMongoUserIdFromClerk } from "@/lib/auth"
 
 type DashboardHabit = {
   _id: string
@@ -21,8 +21,10 @@ type DashboardHabit = {
 export async function GET(req: Request) {
   await connectToMongo()
 
-  const userId = await getUserIdFromRequestCookie()
-  if (!userId) {
+  let userId: string
+  try {
+    userId = await requireMongoUserIdFromClerk()
+  } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

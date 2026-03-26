@@ -3,14 +3,18 @@ import mongoose, { Schema, type InferSchemaType, type HydratedDocument } from "m
 export interface IUser {
   email: string
   name?: string
-  passwordHash: string
+  // For Clerk users
+  clerkUserId?: string
+  // For legacy/local auth (optional now)
+  passwordHash?: string
 }
 
 const UserSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true, trim: true },
     name: { type: String, required: false, trim: true },
-    passwordHash: { type: String, required: true, select: false },
+    clerkUserId: { type: String, required: false, unique: true, sparse: true, index: true },
+    passwordHash: { type: String, required: false, select: false },
   },
   { timestamps: true }
 )

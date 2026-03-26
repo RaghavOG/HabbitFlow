@@ -1,4 +1,4 @@
-﻿# HabitFlow
+# HabitFlow
 
 ## Logo
 <img src="./public/logo.svg" alt="HabitFlow logo" width="64" />
@@ -44,10 +44,30 @@ See [`ARCHITECTURE.md`](./ARCHITECTURE.md).
    ```
 4. Open the app at `http://localhost:3000`.
 
+## Windows (Desktop) Install
+If you’re using the Electron build:
+1. Download the latest `HabitFlow Setup <version>.exe` from GitHub Releases.
+2. Run the installer.
+3. If Windows SmartScreen shows a warning, click **More info → Run anyway** (expected for unsigned builds).
+4. Launch HabitFlow from the Start Menu.
+
+## Android (Add to Home Screen)
+1. Open the web app in **Chrome**.
+2. Tap the **⋮** menu.
+3. Tap **Install app** (or **Add to Home screen**).
+4. Open HabitFlow from your home screen (it runs like an app).
+
+## iPhone (Add to Home Screen)
+1. Open the web app in **Safari**.
+2. Tap the **Share** button.
+3. Tap **Add to Home Screen**.
+4. Open HabitFlow from your home screen.
+
 ## Env Variables
 Required:
 - `MONGODB_URI` - MongoDB connection string
-- `JWT_SECRET` - secret used for signing/verifying the auth cookie token
+- `NEXTAUTH_SECRET` - secret used by NextAuth to sign/verify session tokens
+- `NEXTAUTH_URL` - base URL (required in production)
 
 Optional:
 - `OPENAI_API_KEY` - enables real AI insights; when missing, the UI uses deterministic fallback insights

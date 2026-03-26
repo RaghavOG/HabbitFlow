@@ -12,6 +12,21 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+
+    // Dependencies:
+    "node_modules/**",
+
+    // Electron / installers:
+    "electron/dist/**",
+    "electron/out/**",
+    "electron/build/**",
+
+    // Misc:
+    "coverage/**",
+
+    // Large/binary assets (avoid accidental lint traversal)
+    "**/*.exe",
+    "**/*.msi",
   ]),
 ]);
 

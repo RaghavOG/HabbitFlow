@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import mongoose from "mongoose"
 import { connectToMongo } from "@/lib/mongodb"
-import { getUserIdFromRequestCookie } from "@/lib/auth"
+import { requireMongoUserIdFromClerk } from "@/lib/auth"
 import { HabitModel } from "@/models/Habit"
 import { HabitLogModel } from "@/models/HabitLog"
 import { AIWeeklyReportModel } from "@/models/AIWeeklyReport"
@@ -100,8 +100,12 @@ async function callOpenAIWeeklyReport(facts: WeeklyFacts): Promise<string[] | nu
 export async function POST() {
   await connectToMongo()
 
-  const userId = await getUserIdFromRequestCookie()
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  let userId: string
+  try {
+    userId = await requireMongoUserIdFromClerk()
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   const now = new Date()
   const { start: weekStart, endExclusive: weekEndExclusive, weekKey } = getWeekRangeUTC(now)

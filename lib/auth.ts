@@ -1,61 +1,36 @@
-import { SignJWT, jwtVerify } from "jose"
-import { cookies } from "next/headers"
+import mongoose from "mongoose"
+import { auth, clerkClient } from "@clerk/nextjs/server"
+import { connectToMongo } from "@/lib/mongodb"
+import { UserModel } from "@/models/User"
 
-const COOKIE_NAME = "hf_token"
+export async function getMongoUserIdFromClerk(): Promise<string | null> {
+  const { userId: clerkUserId } = await auth()
+  if (!clerkUserId) return null
 
-function getSecret() {
-  const secret = process.env.JWT_SECRET
-  if (!secret) throw new Error("Missing JWT_SECRET env var")
-  return new TextEncoder().encode(secret)
-}
+  await connectToMongo()
+  const existing = await UserModel.findOne({ clerkUserId }).select({ _id: 1 }).lean()
+  if (existing) return String(existing._id)
 
-export async function signAuthToken(payload: { userId: string }) {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("30d")
-    .sign(getSecret())
-}
+  // If webhook hasn't created the Mongo user yet (common in local/dev),
+  // create it on-demand from Clerk profile.
+  const client = await clerkClient()
+  const clerkUser = await client.users.getUser(clerkUserId)
+  const email = clerkUser.emailAddresses?.[0]?.emailAddress?.toLowerCase()
+  const name = `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || undefined
+  if (!email) return null
 
-export async function verifyAuthToken(token: string) {
-  const { payload } = await jwtVerify(token, getSecret())
-  const userId = payload.userId
-  if (typeof userId !== "string") throw new Error("Invalid token payload")
-  return { userId }
-}
-
-export async function getUserIdFromRequestCookie(): Promise<string | null> {
-  const token = (await cookies()).get(COOKIE_NAME)?.value
-  if (!token) return null
-  try {
-    const { userId } = await verifyAuthToken(token)
-    return userId
-  } catch {
-    return null
-  }
-}
-
-export async function setAuthCookie(token: string) {
-  ;(await cookies()).set({
-    name: COOKIE_NAME,
-    value: token,
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
+  const created = await UserModel.create({
+    clerkUserId,
+    email,
+    ...(name ? { name } : {}),
   })
+
+  return String(created._id)
 }
 
-export async function clearAuthCookie() {
-  ;(await cookies()).set({
-    name: COOKIE_NAME,
-    value: "",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 0,
-  })
+export async function requireMongoUserIdFromClerk(): Promise<string> {
+  const userId = await getMongoUserIdFromClerk()
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) throw new Error("Unauthorized")
+  return userId
 }
 

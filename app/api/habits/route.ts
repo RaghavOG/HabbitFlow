@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import mongoose, { type Types } from "mongoose"
 import { connectToMongo } from "@/lib/mongodb"
-import { getUserIdFromRequestCookie } from "@/lib/auth"
+import { requireMongoUserIdFromClerk } from "@/lib/auth"
 import { HabitModel } from "@/models/Habit"
 
 type HabitDoc = {
@@ -29,8 +29,12 @@ function toResponseHabit(h: HabitDoc) {
 export async function GET() {
   await connectToMongo()
 
-  const userId = await getUserIdFromRequestCookie()
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  let userId: string
+  try {
+    userId = await requireMongoUserIdFromClerk()
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   const habits = await (HabitModel as unknown as HabitWithHelpers).getAllHabits(userId)
   return NextResponse.json({ habits: habits.map(toResponseHabit) })
@@ -39,8 +43,12 @@ export async function GET() {
 export async function POST(req: Request) {
   await connectToMongo()
 
-  const userId = await getUserIdFromRequestCookie()
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  let userId: string
+  try {
+    userId = await requireMongoUserIdFromClerk()
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   const body = (await req.json()) as { name?: string; color?: string; goalPerMonth?: number }
   const name = (body.name ?? "").trim()
