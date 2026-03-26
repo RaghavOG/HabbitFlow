@@ -10,26 +10,30 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Spinner } from "@/components/ui/spinner"
 
-export default function AddHabitDialog() {
+export default function AddHabitDialog({ onCreated }: { onCreated?: () => void }) {
+  const [open, setOpen] = React.useState(false)
   const [name, setName] = React.useState("")
   const [color, setColor] = React.useState("#22c55e")
   const [goalPerMonth, setGoalPerMonth] = React.useState<number>(20)
+  const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm">Add Habit</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Habit</DialogTitle>
-          <DialogDescription>This UI is ready; backend endpoint integration comes next.</DialogDescription>
+          <DialogDescription>Create a new habit for the monthly grid.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
+          {error && <div className="text-sm text-destructive">{error}</div>}
           <div className="space-y-1">
             <div className="text-sm text-muted-foreground">Name</div>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Gym" />
@@ -50,12 +54,40 @@ export default function AddHabitDialog() {
             />
           </div>
 
-          <Card className="p-3 text-sm text-muted-foreground">
-            Backend `POST /api/habits` is not implemented yet, so Submit is disabled.
-          </Card>
-
-          <Button disabled className="w-full">
-            Submit (disabled)
+          <Button
+            className="w-full"
+            disabled={loading}
+            onClick={async () => {
+              setError(null)
+              setLoading(true)
+              try {
+                const res = await fetch("/api/habits", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name, color, goalPerMonth }),
+                  credentials: "include",
+                })
+                const json = (await res.json()) as { error?: string }
+                if (!res.ok) throw new Error(json.error || "Failed to create habit")
+                setName("")
+                setColor("#22c55e")
+                setGoalPerMonth(20)
+                setOpen(false)
+                onCreated?.()
+              } catch (e: unknown) {
+                setError(e instanceof Error ? e.message : "Failed to create habit")
+              } finally {
+                setLoading(false)
+              }
+            }}
+          >
+            {loading ? (
+              <>
+                <Spinner className="mr-2" /> Creating...
+              </>
+            ) : (
+              "Create Habit"
+            )}
           </Button>
         </div>
       </DialogContent>

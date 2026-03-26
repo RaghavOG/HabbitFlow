@@ -15,9 +15,6 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 )
 
-// Extra explicit unique index for clarity.
-UserSchema.index({ email: 1 }, { unique: true })
-
 export type UserDocument = HydratedDocument<IUser>
 export type UserModel = mongoose.Model<UserDocument>
 

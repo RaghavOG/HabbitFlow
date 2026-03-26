@@ -17,8 +17,6 @@ const HabitSchema = new Schema<IHabit>(
   { timestamps: true }
 )
 
-HabitSchema.index({ userId: 1 })
-
 // One Habit -> Many HabitLogs (virtual relationship; not stored in the document).
 HabitSchema.virtual("logs", {
   ref: "HabitLog",

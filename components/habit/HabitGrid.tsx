@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table"
 import HabitRow from "@/components/habit/HabitRow"
 import { toStartOfDayUTC, formatDateKeyUTC } from "@/utils/date"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 type DashboardHabit = {
   _id: string
@@ -57,15 +58,15 @@ export default function HabitGrid({ habits, year, month, onToggleHabit, onMarkDo
     (habitId: string, dateKey: string, isDone: boolean, isFuture: boolean) => {
       if (isFuture) return
       // Drag feature: only active when starting on an "undone" cell.
-      if (isDone) return
-      draggingToDoneRef.current = true
+      // If the user starts from a done cell, we do a normal toggle and disable drag-mark.
+      draggingToDoneRef.current = !isDone
 
       const key = `${habitId}|${dateKey}`
       if (toggledKeysRef.current.has(key)) return
       toggledKeysRef.current.add(key)
-      onMarkDone(habitId, dateKey)
+      onToggleHabit(habitId, dateKey)
     },
-    [onMarkDone]
+    [onToggleHabit]
   )
 
   const handlePointerEnterCell = React.useCallback(
@@ -83,14 +84,22 @@ export default function HabitGrid({ habits, year, month, onToggleHabit, onMarkDo
   )
 
   return (
-    <div onPointerUp={stopDrag} onPointerCancel={stopDrag}>
+    <TooltipProvider delayDuration={150}>
+      <div onPointerUp={stopDrag} onPointerCancel={stopDrag}>
       <div className="w-full overflow-x-auto">
         <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="sticky left-0 bg-background/90 backdrop-blur">Habit</TableHead>
+            <TableHead className="sticky left-0 z-10 bg-background/90 backdrop-blur">Habit</TableHead>
             {days.map((day) => (
-              <TableHead key={day} className="px-1 text-center">
+              <TableHead
+                key={day}
+                className={`px-1 text-center ${(() => {
+                  const dateUtc = new Date(Date.UTC(year, month - 1, day))
+                  const key = formatDateKeyUTC(dateUtc)
+                  return key === todayKey ? "border-b-2 border-blue-400/80" : ""
+                })()}`}
+              >
                 {day}
               </TableHead>
             ))}
@@ -107,7 +116,6 @@ export default function HabitGrid({ habits, year, month, onToggleHabit, onMarkDo
               month={month}
               todayStartUTC={todayStartUTC}
               todayKey={todayKey}
-              onToggleHabit={onToggleHabit}
               onPointerDownCell={handlePointerDownCell}
               onPointerEnterCell={handlePointerEnterCell}
             />
@@ -115,7 +123,8 @@ export default function HabitGrid({ habits, year, month, onToggleHabit, onMarkDo
         </TableBody>
         </Table>
       </div>
-    </div>
+      </div>
+    </TooltipProvider>
   )
 }
 

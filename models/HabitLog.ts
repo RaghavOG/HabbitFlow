@@ -27,7 +27,6 @@ const HabitLogSchema = new Schema<IHabitLog>(
 
 // One log per habit per day.
 HabitLogSchema.index({ habitId: 1, date: 1 }, { unique: true })
-HabitLogSchema.index({ habitId: 1 })
 HabitLogSchema.index({ date: 1 })
 
 export type HabitLogDocument = HydratedDocument<IHabitLog>

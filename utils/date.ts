@@ -34,3 +34,15 @@ export function formatDateKeyUTC(input: Date | string | number): string {
   return `${y}-${m}-${day}`
 }
 
+export function getWeekRangeUTC(input: Date | string | number) {
+  const d = toStartOfDayUTC(input)
+  // JS: 0=Sun..6=Sat
+  const dayOfWeek = d.getUTCDay()
+  // Convert so Monday is 0..Sunday is 6
+  const mondayOffset = (dayOfWeek + 6) % 7
+  const start = addDaysUTC(d, -mondayOffset)
+  const endExclusive = addDaysUTC(start, 7)
+  const weekKey = `${start.getUTCFullYear()}-${String(start.getUTCMonth() + 1).padStart(2, "0")}-${String(start.getUTCDate()).padStart(2, "0")}`
+  return { start, endExclusive, weekKey }
+}
+

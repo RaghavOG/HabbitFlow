@@ -26,7 +26,6 @@ type Props = {
   month: number // 1-12
   todayStartUTC: Date
   todayKey: string
-  onToggleHabit: (habitId: string, dateKey: string) => void
   onPointerDownCell: (habitId: string, dateKey: string, isDone: boolean, isFuture: boolean) => void
   onPointerEnterCell: (habitId: string, dateKey: string, isDone: boolean, isFuture: boolean) => void
 }
@@ -38,13 +37,12 @@ export default function HabitRow({
   month,
   todayStartUTC,
   todayKey,
-  onToggleHabit,
   onPointerDownCell,
   onPointerEnterCell,
 }: Props) {
   return (
     <TableRow className="align-top">
-      <TableCell className="font-medium sticky left-0 bg-background/90 backdrop-blur">
+      <TableCell className="font-medium sticky left-0 z-10 bg-background/90 backdrop-blur">
         <div className="flex items-center gap-2">
           <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: habit.color }} />
           <span className="whitespace-nowrap">{habit.name}</span>
@@ -59,17 +57,16 @@ export default function HabitRow({
         const isDone = habit.logs[dateKey] === true
 
         return (
-          <TableCell key={day} className="px-1 py-0 text-center">
+          <TableCell
+            key={day}
+            className={`px-1 py-0 text-center ${isToday ? "shadow-[inset_0_-2px_0_rgba(59,130,246,0.65)]" : ""}`}
+          >
             <HabitCell
               dateKey={dateKey}
               isDone={isDone}
               isFuture={isFuture}
               isToday={isToday}
               habitColor={habit.color}
-              onClick={() => {
-                if (isFuture) return
-                onToggleHabit(habit._id, dateKey)
-              }}
               onPointerDown={() => onPointerDownCell(habit._id, dateKey, isDone, isFuture)}
               onPointerEnter={() => onPointerEnterCell(habit._id, dateKey, isDone, isFuture)}
             />
