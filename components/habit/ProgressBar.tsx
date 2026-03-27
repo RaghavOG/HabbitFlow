@@ -1,25 +1,38 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "@/lib/utils"
 
 export default function ProgressBar({ value }: { value: number }) {
   const safe = Math.max(0, Math.min(100, value))
   const rounded = Math.round(safe)
+
+  const colorClass =
+    rounded >= 80
+      ? "from-emerald-500 to-green-400"
+      : rounded >= 50
+      ? "from-blue-500 to-cyan-400"
+      : rounded >= 25
+      ? "from-yellow-500 to-amber-400"
+      : "from-red-500 to-rose-400"
+
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative w-24 h-2 rounded-full overflow-hidden bg-zinc-800 group">
+    <div className="flex items-center gap-2.5">
+      <div className="relative w-20 h-1.5 rounded-full overflow-hidden bg-muted">
         <div
-          className="h-full transition-[width] duration-500 ease-out bg-gradient-to-r from-green-500 to-blue-500"
+          className={cn("h-full rounded-full bg-gradient-to-r transition-[width] duration-700 ease-out", colorClass)}
           style={{ width: `${safe}%` }}
         />
-        <div
-          className="absolute right-0 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md bg-zinc-950/90 text-xs text-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-        >
-          {rounded}%
-        </div>
       </div>
-      <span className="tabular-nums text-xs text-zinc-400">{rounded}%</span>
+      <span className={cn(
+        "tabular-nums text-xs font-medium",
+        rounded >= 80 ? "text-emerald-500" :
+        rounded >= 50 ? "text-blue-500" :
+        rounded >= 25 ? "text-yellow-500" :
+        "text-red-500"
+      )}>
+        {rounded}%
+      </span>
     </div>
   )
 }
-

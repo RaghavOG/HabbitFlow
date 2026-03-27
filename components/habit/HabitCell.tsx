@@ -23,8 +23,6 @@ export default function HabitCell({
   onPointerDown,
   onPointerEnter,
 }: Props) {
-  const bg = isFuture ? "#d1d5db" : isDone ? habitColor : "#1f2937"
-
   return (
     <div className="px-0 py-1">
       <Tooltip>
@@ -38,24 +36,31 @@ export default function HabitCell({
               isFuture ? `Future day` : `${dateKey} ${isDone ? "mark undone" : "mark done"}`
             }
             className={cn(
-              "h-6 w-6 sm:h-7 sm:w-7 rounded-lg border border-transparent transition-colors",
-              "transform-gpu hover:scale-[1.08] hover:brightness-110 active:brightness-95",
-              "disabled:cursor-not-allowed disabled:opacity-70",
-              "cursor-pointer",
-              "ring-offset-2",
-              isToday && "ring-2 ring-blue-400/80"
+              "h-6 w-6 sm:h-7 sm:w-7 rounded-lg border border-transparent transition-all duration-150",
+              "transform-gpu hover:scale-[1.15] active:scale-95",
+              "disabled:cursor-not-allowed disabled:opacity-40",
+              "cursor-pointer ring-offset-background",
+              isDone && "shadow-sm",
+              isToday && "ring-2 ring-primary/70 ring-offset-1",
+              !isDone && !isFuture && "hover:border-primary/30 hover:bg-primary/8",
             )}
-            style={{ backgroundColor: bg }}
+            style={{
+              backgroundColor: isFuture
+                ? "var(--muted)"
+                : isDone
+                ? habitColor
+                : undefined,
+              boxShadow: isDone ? `0 0 8px ${habitColor}50` : undefined,
+            }}
           />
         </TooltipTrigger>
-        <TooltipContent>
-          <div className="font-medium">{dateKey}</div>
-          <div className="text-muted-foreground text-xs">
-            {isFuture ? "Future" : isDone ? "Done" : "Not done"}
+        <TooltipContent className="text-xs">
+          <div className="font-semibold">{dateKey}</div>
+          <div className="text-muted-foreground">
+            {isFuture ? "Future" : isDone ? "✓ Done" : "Not done"}
           </div>
         </TooltipContent>
       </Tooltip>
     </div>
   )
 }
-
